@@ -11,7 +11,7 @@
 			"grab": {
 				"grabbable": false
 			},
-			"serverScripts": "../bubble-pop.js",
+			"serverScripts": "../bubble-pop.entity.js",
 			"shapeType": "static-mesh",
 			"modelURL": "./bubble-pop.glb"
 		}
