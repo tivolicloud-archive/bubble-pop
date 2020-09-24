@@ -4,7 +4,7 @@
 
 ## Try it now!
 
-Open **Create**, click **Import Entities from URL (.json)** and then paste this link:
+Open **Create**, click **Import Entities from URL (.json)** and paste this link:
 
 https://files.tivolicloud.com/maki/scripts/bubble-pop/assets/bubble-pop.json
 
