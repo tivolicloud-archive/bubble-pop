@@ -17,6 +17,9 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 	const TRANSITION_TIME = 100; // ms
 	const TRANSITION_INTERPOLATION = standardEasing;
 
+	const ENTITY_HOST_TYPE: Entities.EntityHostType =
+		Script.context == "entity_server" ? "domain" : "local";
+
 	const COLORS = [
 		"f44336", // red
 		"ff9800", // orange
@@ -79,7 +82,7 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 					entityPriority: "prioritized",
 					script: Script.resolvePath("./bubble.client.js"),
 				},
-				"domain",
+				ENTITY_HOST_TYPE,
 			);
 
 			if (!dontTransitionIn) {
@@ -311,6 +314,7 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 				Audio.playSound(POP_SOUND, {
 					volume: 0.1,
 					position: bubblePosition,
+					localOnly: ENTITY_HOST_TYPE == "local",
 				});
 			}
 
@@ -357,7 +361,7 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 					backgroundAlpha: 0,
 					grab: { grabbable: false },
 				},
-				"domain",
+				ENTITY_HOST_TYPE,
 			);
 
 			Script.setTimeout(() => {
@@ -369,8 +373,13 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 			Messages.subscribe(this.entityId);
 			this.signals.connect(
 				Messages.messageReceived,
-				(channel, message) => {
+				(channel, message, senderId, localOnly) => {
 					if (channel != this.entityId) return;
+					if (
+						ENTITY_HOST_TYPE == "local" &&
+						senderId != MyAvatar.sessionUUID
+					)
+						return;
 
 					for (const column of this.bubbles) {
 						for (const bubble of column) {

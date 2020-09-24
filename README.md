@@ -6,7 +6,12 @@
 
 Open **Create**, click **Import Entities from URL (.json)** and paste this link:
 
-https://files.tivolicloud.com/maki/scripts/bubble-pop/assets/bubble-pop.json
+-   **Server version (slower but synced)**
+    <br>
+    https://files.tivolicloud.com/maki/scripts/bubble-pop/assets/bubble-pop.server.json
+-   **Local version (fast but unsynced)**
+    <br>
+    https://files.tivolicloud.com/maki/scripts/bubble-pop/assets/bubble-pop.local.json
 
 ## How to compile
 
