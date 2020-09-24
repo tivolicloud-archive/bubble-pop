@@ -80,7 +80,11 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 					collisionless: false,
 					grab: { grabbable: false },
 					entityPriority: "prioritized",
-					script: Script.resolvePath("./bubble.client.js"),
+					script: Script.resolvePath(
+						ENTITY_HOST_TYPE == "local"
+							? "./bubble-local.client.js"
+							: "./bubble.client.js",
+					),
 				},
 				ENTITY_HOST_TYPE,
 			);
@@ -375,11 +379,7 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 				Messages.messageReceived,
 				(channel, message, senderId, localOnly) => {
 					if (channel != this.entityId) return;
-					if (
-						ENTITY_HOST_TYPE == "local" &&
-						senderId != MyAvatar.sessionUUID
-					)
-						return;
+					if (ENTITY_HOST_TYPE == "local" && !localOnly) return;
 
 					for (const column of this.bubbles) {
 						for (const bubble of column) {
