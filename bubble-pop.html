@@ -1,0 +1,238 @@
+<html>
+	<body>
+		<head>
+			<link
+				href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+				rel="stylesheet"
+			/>
+			<style>
+				body {
+					font-family: "Roboto", sans-serif;
+				}
+
+				h1 {
+					margin: 0;
+					font-weight: 500;
+				}
+
+				#bubble {
+					position: absolute;
+					width: 45px;
+					height: 45px;
+					margin: 2.5px;
+					border-radius: 25px;
+				}
+
+				#bubble.red {
+					background: #f44336;
+				}
+				#bubble.orange {
+					background: #ff9800;
+				}
+				#bubble.yellow {
+					background: #ffeb3b;
+				}
+				#bubble.green {
+					background: #8bc34a;
+				}
+				#bubble.lightblue {
+					background: #03a9f4;
+				}
+				#bubble.indigo {
+					background: #3f51b5;
+				}
+				#bubble.purple {
+					background: #9c27b0;
+				}
+			</style>
+		</head>
+		<script>
+			const Color = [
+				"red",
+				"orange",
+				"yellow",
+				"green",
+				"lightblue",
+				"indigo",
+				"purple",
+			];
+
+			const getRandomColor = () =>
+				Color[Math.floor(Math.random() * Color.length)];
+
+			class Bubble {
+				bubbleSize = 50;
+
+				bubblePop;
+				x;
+				y;
+
+				el;
+				color;
+				popped = false;
+
+				constructor(bubblePop, x, y) {
+					this.bubblePop = bubblePop;
+					this.x = x;
+					this.y = y;
+					this.color = getRandomColor();
+
+					this.el = document.createElement("div");
+					this.el.id = "bubble";
+					this.el.addEventListener("mousedown", e => this.onClick(e));
+					document.body.appendChild(this.el);
+
+					this.draw();
+				}
+
+				onClick(e) {
+					this.bubblePop.onClick(this);
+				}
+
+				draw() {
+					this.el.className = this.color;
+					this.el.style.top = this.y * this.bubbleSize + "px";
+					this.el.style.left = this.x * this.bubbleSize + "px";
+				}
+
+				pop() {
+					this.el.remove();
+					this.popped = true;
+				}
+			}
+
+			class BubblePop {
+				width = 7;
+				height = 12;
+
+				bubbles;
+
+				popped = 0;
+				poppedEl;
+
+				createBubbles() {
+					this.bubbles = new Array(this.width)
+						.fill(null)
+						.map((_, x) =>
+							new Array(this.height).fill(null).map((_, y) => {
+								return new Bubble(this, x, y);
+							}),
+						);
+				}
+
+				findSameBubblesAround(bubble, lastSameBubblesHashed = {}) {
+					const x = bubble.x;
+					const y = bubble.y;
+					const bubs = [bubble];
+
+					// left, right, top, bottom
+					if (x > 0) bubs.push(this.bubbles[x - 1][y]);
+					if (x < this.width - 1) bubs.push(this.bubbles[x + 1][y]);
+					if (y > 0) bubs.push(this.bubbles[x][y - 1]);
+					if (y < this.height - 1) bubs.push(this.bubbles[x][y + 1]);
+
+					let sameBubblesHashed = {
+						...lastSameBubblesHashed,
+						...bubs
+							.filter(b => b.color == bubble.color)
+							.reduce((obj, b) => {
+								obj[b.x + "," + b.y] = b;
+								return obj;
+							}, {}),
+					};
+
+					for (const hash of Object.keys(sameBubblesHashed)) {
+						if (lastSameBubblesHashed[hash] == null) {
+							sameBubblesHashed = this.findSameBubblesAround(
+								sameBubblesHashed[hash],
+								sameBubblesHashed,
+							);
+						}
+					}
+
+					return sameBubblesHashed;
+				}
+
+				moveBubblesDown() {
+					for (let x = 0; x < this.bubbles.length; x++) {
+						// remove popped
+						this.bubbles[x] = this.bubbles[x].filter(
+							bubble => !bubble.popped,
+						);
+
+						// fill empty
+						if (this.bubbles[x].length != this.height) {
+							const leftToAdd =
+								this.height - this.bubbles[x].length;
+							for (let i = 0; i < leftToAdd; i++) {
+								this.bubbles[x].unshift(
+									new Bubble(this, x, leftToAdd - i),
+								);
+							}
+						}
+
+						for (let y = 0; y < this.bubbles[x].length; y++) {
+							const bubble = this.bubbles[x][y];
+
+							if (bubble.y != y) {
+								bubble.y = Number(y);
+								bubble.draw();
+							}
+						}
+					}
+				}
+
+				isGameOver() {
+					for (let x = 0; x < this.bubbles.length; x++) {
+						for (let y = 0; y < this.bubbles[x].length; y++) {
+							if (
+								Object.keys(
+									this.findSameBubblesAround(
+										this.bubbles[x][y],
+									),
+								).length > 1
+							) {
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+
+				updatePopped() {
+					const gameOver = this.isGameOver();
+					this.poppedEl.textContent =
+						this.popped +
+						" popped" +
+						(gameOver ? " (game over)" : "");
+				}
+
+				onClick(bubble) {
+					const sameBubbles = Object.values(
+						this.findSameBubblesAround(bubble),
+					);
+					if (sameBubbles.length <= 1) return;
+
+					for (const b of sameBubbles) {
+						b.pop();
+						this.popped++;
+					}
+
+					this.moveBubblesDown();
+					this.updatePopped();
+				}
+
+				constructor() {
+					this.createBubbles();
+					this.poppedEl = document.createElement("h1");
+					this.poppedEl.textContent = "0 popped";
+					this.poppedEl.style.position = "absolute";
+					this.poppedEl.style.top = this.height * 50 + 4 + "px";
+					document.body.appendChild(this.poppedEl);
+				}
+			}
+
+			new BubblePop();
+		</script>
+	</body>
+</html>
