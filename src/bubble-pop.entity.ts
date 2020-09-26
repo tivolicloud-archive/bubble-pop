@@ -34,6 +34,10 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 		Script.resolvePath("./assets/pop.wav"),
 	);
 
+	const DING_SOUND = SoundCache.getSound(
+		Script.resolvePath("./assets/ding.wav"),
+	);
+
 	const hexToRgb = (hex: string) => ({
 		r: parseInt(hex.slice(0, 2), 16),
 		g: parseInt(hex.slice(2, 4), 16),
@@ -303,11 +307,34 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 			const sameBubbles = objectValues(
 				this.findSameBubblesAround(bubble),
 			);
-			if (sameBubbles.length <= 1) return;
 
 			const bubblePosition = Entities.getEntityProperties<
 				Entities.EntityPropertiesSphere
 			>(bubble.entityId).position;
+
+			if (sameBubbles.length <= 1) {
+				if (this.isGameOver()) {
+					// pop and recreate
+					for (const column of this.bubbles) {
+						for (const bubble of column) {
+							bubble.pop(true);
+						}
+					}
+					this.createBubbles();
+					// reset score
+					this.popped = 0;
+					this.updateScore();
+					// play sound!
+					if (DING_SOUND.downloaded) {
+						Audio.playSound(DING_SOUND, {
+							volume: 0.1,
+							position: bubblePosition,
+							localOnly: ENTITY_HOST_TYPE == "local",
+						});
+					}
+				}
+				return;
+			}
 
 			for (const b of sameBubbles) {
 				b.pop();
@@ -324,9 +351,6 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 
 			this.moveBubblesDown();
 			this.updateScore();
-
-			// const gameOver = this.isGameOver();
-			// TODO: handle game over
 		}
 
 		preCleanup() {
