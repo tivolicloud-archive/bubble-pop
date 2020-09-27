@@ -185,6 +185,8 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 		entityId: Uuid;
 		scoreTextId: Uuid;
 
+		inGameOverAnimation = false;
+
 		createBubbles() {
 			this.bubbles = Array.apply(null, Array(WIDTH)).map((_, x) =>
 				Array.apply(null, Array(HEIGHT)).map((_, y) => {
@@ -303,6 +305,9 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 		}
 
 		gameOver() {
+			if (this.inGameOverAnimation) return;
+			this.inGameOverAnimation = true;
+
 			// play sound!
 			const position = Entities.getEntityProperties<
 				Entities.EntityPropertiesSphere
@@ -343,13 +348,17 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 
 			Script.setTimeout(() => {
 				this.createBubbles();
-				// reset score
+
 				this.popped = 0;
 				this.updateScore();
+
+				this.inGameOverAnimation = false;
 			}, 1000 * 2);
 		}
 
 		onClick(bubble: Bubble) {
+			if (this.inGameOverAnimation) return;
+
 			const sameBubbles = objectValues(
 				this.findSameBubblesAround(bubble),
 			);
