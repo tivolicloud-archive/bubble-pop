@@ -16,6 +16,10 @@
 		startFarTrigger(entityId: Uuid) {
 			Messages.sendMessage(this.parentId, entityId, true);
 		}
+
+		startNearTrigger(entityId: Uuid) {
+			Messages.sendMessage(this.parentId, entityId, true);
+		}
 	}
 
 	return new Bubble();

@@ -12,6 +12,14 @@
 			if (!event.isPrimaryButton) return;
 			Messages.sendMessage(this.parentId, entityId);
 		}
+
+		startFarTrigger(entityId: Uuid) {
+			Messages.sendMessage(this.parentId, entityId);
+		}
+
+		startNearTrigger(entityId: Uuid) {
+			Messages.sendMessage(this.parentId, entityId);
+		}
 	}
 
 	return new Bubble();

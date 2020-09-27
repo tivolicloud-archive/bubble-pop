@@ -82,12 +82,12 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 					},
 					color: hexToRgb(this.color),
 					collisionless: false,
-					grab: { grabbable: false },
+					grab: { grabbable: false, triggerable: true },
 					entityPriority: "prioritized",
 					script: Script.resolvePath(
-						ENTITY_HOST_TYPE == "local"
-							? "./bubble-local.client.js"
-							: "./bubble.client.js",
+						(ENTITY_HOST_TYPE == "local"
+							? "./bubble-local.client.js?"
+							: "./bubble.client.js?") + Date.now(),
 					),
 				},
 				ENTITY_HOST_TYPE,
