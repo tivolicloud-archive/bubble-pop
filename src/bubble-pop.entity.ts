@@ -83,7 +83,6 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 					color: hexToRgb(this.color),
 					collisionless: false,
 					grab: { grabbable: false, triggerable: true },
-					entityPriority: "prioritized",
 					script: Script.resolvePath(
 						(ENTITY_HOST_TYPE == "local"
 							? "./bubble-local.client.js?"
@@ -303,36 +302,60 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 			);
 		}
 
+		gameOver() {
+			// play sound!
+			const position = Entities.getEntityProperties<
+				Entities.EntityPropertiesSphere
+			>(this.entityId).position;
+
+			if (DING_SOUND.downloaded) {
+				Audio.playSound(DING_SOUND, {
+					volume: 0.1,
+					position,
+					localOnly: ENTITY_HOST_TYPE == "local",
+				});
+			}
+
+			// pop and recreate
+			for (const column of this.bubbles) {
+				for (const bubble of column) {
+					Entities.editEntity<Entities.EntityPropertiesSphere>(
+						bubble.entityId,
+						{
+							name: "Bubble",
+							parentID: "",
+							dynamic: true,
+							gravity: {
+								x: 0,
+								y: -9.8,
+								z: 0,
+							},
+							velocity: {
+								x: Math.random() - 0.5,
+								y: -1,
+								z: Math.random() - 0.5,
+							},
+							lifetime: 3,
+						},
+					);
+				}
+			}
+
+			Script.setTimeout(() => {
+				this.createBubbles();
+				// reset score
+				this.popped = 0;
+				this.updateScore();
+			}, 1000 * 2);
+		}
+
 		onClick(bubble: Bubble) {
 			const sameBubbles = objectValues(
 				this.findSameBubblesAround(bubble),
 			);
 
-			const bubblePosition = Entities.getEntityProperties<
-				Entities.EntityPropertiesSphere
-			>(bubble.entityId).position;
-
 			if (sameBubbles.length <= 1) {
-				if (this.isGameOver()) {
-					// pop and recreate
-					for (const column of this.bubbles) {
-						for (const bubble of column) {
-							bubble.pop(true);
-						}
-					}
-					this.createBubbles();
-					// reset score
-					this.popped = 0;
-					this.updateScore();
-					// play sound!
-					if (DING_SOUND.downloaded) {
-						Audio.playSound(DING_SOUND, {
-							volume: 0.1,
-							position: bubblePosition,
-							localOnly: ENTITY_HOST_TYPE == "local",
-						});
-					}
-				}
+				if (this.isGameOver()) this.gameOver();
 				return;
 			}
 
@@ -340,6 +363,10 @@ import { standardEasing, TransitionManager } from "./lib/transition-manager";
 				b.pop();
 				this.popped++;
 			}
+
+			const bubblePosition = Entities.getEntityProperties<
+				Entities.EntityPropertiesSphere
+			>(bubble.entityId).position;
 
 			if (POP_SOUND.downloaded) {
 				Audio.playSound(POP_SOUND, {
