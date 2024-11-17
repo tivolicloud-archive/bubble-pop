@@ -1,7 +1,7 @@
 {
 	"scripts": {
-		"files": "copyfiles -u 1 src/assets/**/* dist",
-		"patch": "node patch-modules.js dist",
+		"files": "copyfiles -u 1 src/assets/**/* out",
+		"patch": "node patch-modules.js out",
 		"build": "npm run files && tsc && npm run patch",
 		"start": "npm run files && tsc-watch --onSuccess \"npm run patch\""
 	},

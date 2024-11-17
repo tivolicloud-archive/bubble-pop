@@ -20,4 +20,4 @@ yarn
 yarn build
 ```
 
-Then upload the `dist` folder
+Then upload the `out` folder
