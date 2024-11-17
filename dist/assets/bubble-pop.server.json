@@ -1,0 +1,19 @@
+{
+	"Entities": [
+		{
+			"name": "Bubble Pop",
+			"type": "Model",
+			"dimensions": {
+				"x": 1.7,
+				"y": 3.05,
+				"z": 0.9
+			},
+			"grab": {
+				"grabbable": false
+			},
+			"serverScripts": "../bubble-pop.entity.js",
+			"shapeType": "static-mesh",
+			"modelURL": "./bubble-pop.glb"
+		}
+	]
+}
